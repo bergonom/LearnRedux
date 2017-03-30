@@ -14,158 +14,10 @@ functions, that’s a noop.
 
 
 var redux = require('redux');
-var axios = require('axios');
 console.log('starting redux todo example');
 
-
-// Name reducer and action generators
-// -----------------------------------
-var nameReducer = (state = 'Anonymous', action) => {
-  switch(action.type) {
-    case 'CHANGE_NAME':
-      return action.name;
-    default:
-      return state;
-  }
-};
-
-var changeName = (name) => {
-  return {
-    type: 'CHANGE_NAME',
-    name
-  }
-}
-
-// Hobbies reducer and action generators
-// -----------------------------------
-var nextHobbyId = 1;
-var hobbiesReducer = (state = [], action) => {
-  switch(action.type) {
-    case 'ADD_HOBBY':
-      return [
-        ...state,
-        {
-          id: nextHobbyId++,
-          hobby: action.hobby
-        }
-      ];
-    case 'REMOVE_HOBBY':
-      return state.filter((hobby) => {
-            return hobby.id !== action.id
-      });
-    default:
-      return state;
-  }
-};
-
-var addHobby = (hobby) => {
-  return {
-    type: 'ADD_HOBBY',
-    hobby
-  }
-}
-
-var removeHobby = (id) => {
-  return {
-    type: 'REMOVE_HOBBY',
-    id
-  }
-}
-
-
-// Movies reducer and action generators
-// -----------------------------------
-var nextMovieId = 1;
-var moviesReducer = (state = [], action) => {
-  switch(action.type) {
-    case 'ADD_MOVIE':
-      return [
-        ...state,
-        {
-          id: nextMovieId++,
-          title: action.title,
-          genre: action.genre
-        }
-      ];
-    case 'REMOVE_MOVIE':
-      return state.filter((movie) => {
-            return movie.id !== action.id
-      });
-    default:
-      return state;
-  }
-};
-
-var addMovie = (title, genre) => {
-  return {
-    type: 'ADD_MOVIE',
-    title,
-    genre
-  }
-}
-
-var removeMovie = (id) => {
-  return {
-    type: 'REMOVE_MOVIE',
-    id
-  }
-}
-
-
-// Map reducer and action generators
-// -----------------------------------
-var mapReducer = (state = {isFecthing: false, url: undefined}, action) => {
-  switch(action.type) {
-    case 'START_LOCATION_FETCH':
-      return {
-        isFecthing: true,
-        url: undefined
-      };
-    case 'COMPLETE_LOCATION_FETCH':
-      return {
-        isFecthing: false,
-        url: action.url
-      };
-    default:
-      return state;
-  }
-}
-
-var startLocationFetch = () => {
-  return {
-    type: 'START_LOCATION_FETCH'
-  }
-}
-
-var completeLocationFetch = (url) => {
-  return {
-    type: 'COMPLETE_LOCATION_FETCH',
-    url
-  }
-}
-
-var fetchLocation = () => {
-  store.dispatch(startLocationFetch());
-
-  axios.get('http://ipinfo.io').then(function(response) {
-    var loc = response.data.loc;
-    var baseURL = 'http://maps.google.com?q=';
-    store.dispatch(completeLocationFetch(baseURL + loc));
-
-  });
-}
-
-var reducer = redux.combineReducers({
-  name: nameReducer,
-  hobbies: hobbiesReducer,
-  movies: moviesReducer,
-  map: mapReducer
-});
-
-// 'redux.compose' allows for the redux chrome extension to work
-var store = redux.createStore(reducer, redux.compose(
-  window.devToolsExtension ? window.devToolsExtension() : f => f
-));
+var actions = require('./actions/index');
+var store = require('./store/configureStore').configure();
 
 var currentState = store.getState();
 console.log('currentState', currentState);
@@ -183,16 +35,16 @@ var unsubscribe = store.subscribe(() => {
 var currentState = store.getState();
 console.log('currentState', currentState);
 
-fetchLocation();
+store.dispatch(actions.fetchLocation());
 
-store.dispatch(changeName('Joel'));
+store.dispatch(actions.changeName('Joel'));
 
-store.dispatch(addHobby('Running'));
-store.dispatch(addHobby('Walking'));
-store.dispatch(removeHobby(2));
+store.dispatch(actions.addHobby('Running'));
+store.dispatch(actions.addHobby('Walking'));
+store.dispatch(actions.removeHobby(2));
 
-store.dispatch(addMovie('Barf Lord','RomHor'));
-store.dispatch(removeMovie(1));
+store.dispatch(actions.addMovie('Barf Lord','RomHor'));
+store.dispatch(actions.removeMovie(1));
 
-store.dispatch(changeName('Bob'));
+store.dispatch(actions.changeName('Bob'));
 // unsubscribe();
